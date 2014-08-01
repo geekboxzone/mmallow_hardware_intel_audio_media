@@ -313,12 +313,12 @@ static size_t out_get_buffer_size(const struct audio_stream *stream)
 
     if(out->channel_mask > 2){
        buf_size = out->pcm_config.period_size *
-                  audio_stream_frame_size((struct audio_stream *)stream);
+                  audio_stream_out_frame_size((struct audio_stream_out *)stream);
     }
     else{
        buf_size = out->pcm_config.period_size *
                   out->pcm_config.period_count *
-                  audio_stream_frame_size((struct audio_stream *)stream);
+                  audio_stream_out_frame_size((struct audio_stream_out *)stream);
 
        /*latency of audio flinger is based on this
          buffer size. modifying the buffer size to avoid
@@ -330,7 +330,7 @@ static size_t out_get_buffer_size(const struct audio_stream *stream)
         __func__,
         buf_size,
         out->pcm_config.period_size,
-        audio_stream_frame_size((struct audio_stream *)stream));
+        audio_stream_out_frame_size((struct audio_stream_out *)stream));
 
     return buf_size;
 
@@ -642,7 +642,7 @@ err:
 
    if(ret !=0){
     uint64_t duration_ms = ((bytes * 1000)/
-                            (audio_stream_frame_size(&stream->common)) /
+                            (audio_stream_out_frame_size(stream)) /
                             (out_get_sample_rate(&stream->common)));
     ALOGV("%s : silence written", __func__);
     usleep(duration_ms * 1000);
@@ -691,10 +691,12 @@ static int adev_open_output_stream(struct audio_hw_device *dev,
                                    audio_devices_t devices,
                                    audio_output_flags_t flags,
                                    struct audio_config *config,
-                                   struct audio_stream_out **stream_out)
+                                   struct audio_stream_out **stream_out,
+                                   const char *address)
 {
     UNUSED_PARAMETER(devices);
     UNUSED_PARAMETER(handle);
+    UNUSED_PARAMETER(address);
 
     struct audio_device *adev = (struct audio_device *)dev;
     struct stream_out *out;
@@ -887,13 +889,19 @@ static int adev_open_input_stream(struct audio_hw_device *dev,
                                   audio_io_handle_t handle,
                                   audio_devices_t devices,
                                   struct audio_config *config,
-                                  struct audio_stream_in **stream_in)
+                                  struct audio_stream_in **stream_in,
+                                  audio_input_flags_t flags,
+                                  const char *address,
+                                  audio_source_t source)
 {
     UNUSED_PARAMETER(dev);
     UNUSED_PARAMETER(handle);
     UNUSED_PARAMETER(devices);
     UNUSED_PARAMETER(config);
     UNUSED_PARAMETER(stream_in);
+    UNUSED_PARAMETER(flags);
+    UNUSED_PARAMETER(address);
+    UNUSED_PARAMETER(source);
 
     return -ENOSYS;
 }
